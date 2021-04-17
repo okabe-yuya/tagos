@@ -8,5 +8,4 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	golang.org/x/oauth2 v0.0.0-20210413134643-5e61552d6c78 // indirect
 	google.golang.org/api v0.44.0
-// github.com/okabe-yuya/tagos
 )

@@ -1,0 +1,1 @@
+go test ~/go/src/tagos/firestore

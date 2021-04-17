@@ -4,23 +4,22 @@ import (
 	"time"
 )
 
-// Enum: tagos kinds
-type Kind int
-const (
-	Normal Kind = iota
-	Special Kind = iota
-)
-
-type TagosNest struct {
-	Year string
-	Month string
-	Day string
-	Vote string
-}
-
 type TagosRecord struct {
 	Sender string
 	Receiver string
-	Kind Kind
+	Year int
+	Month int
+	Date int
 	CreatedAt time.Time
+}
+
+func TagosRecordInit(sender, receiver string, year, month, date int) *TagosRecord {
+	return &TagosRecord{
+		Sender: sender,
+		Receiver: receiver,
+		Year: year,
+		Month: month,
+		Date: date,
+		CreatedAt: time.Now(),
+	}
 }

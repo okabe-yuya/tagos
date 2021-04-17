@@ -35,11 +35,11 @@ func TagosHttpServer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTagos(r *http.Request) map[string]int {
+func getTagos(r *http.Request) []map[string]interface{} {
 	mode := r.URL.Query().Get("mode")
 	now := time.Now()
-	empty := make(map[string]int, 0)
-	data := types.TagosRecordInit("", "", now.Year(), now.Month(), now.Day())
+	empty := make([]map[string]interface{}, 0)
+	data := types.TagosRecordInit("", "", now.Year(), int(now.Month()), now.Day())
 	ctx, client, err := firestore.GetClient()
 	defer client.Close()
 	if err != nil {
@@ -68,7 +68,7 @@ func postTagos(r *http.Request) error {
     return err
 	}
 	now := time.Now()
-	data := types.TagosRecordInit(body.Sender, body.Reveiver, now.Year(), now.Month(), now.Day())
+	data := types.TagosRecordInit(body.Sender, body.Reveiver, now.Year(), int(now.Month()), now.Day())
 	if err := firestore.PostTagos(data, ctx, client); err != nil {
 		log.Fatalf("Failed from postTagos: %v", err)
     return err

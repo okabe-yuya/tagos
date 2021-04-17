@@ -13,5 +13,12 @@
 .git
 .gitignore
 
+README.md
+test.sh
+depoly.sh
+
+go.mod
+go.sum
+
 node_modules
 #!include:.gitignore

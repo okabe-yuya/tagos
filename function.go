@@ -1,43 +1,58 @@
 package p
 
 import (
-	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
+	"strings"
 
 	"github.com/okabe-yuya/tagos/aggregate"
 	"github.com/okabe-yuya/tagos/firestore"
 	"github.com/okabe-yuya/tagos/types"
+	"github.com/slack-go/slack"
 )
 
+func GetTagosHttpServer(w http.ResponseWriter, r *http.Request) {
+	args, err := slack.SlashCommandParse(r)
+  if err != nil {
+		log.Fatalf("Failed from GetTagosHttpServer: %v", err)
+    w.WriteHeader(http.StatusBadRequest)
+		return
+  }
 
-func TagosHttpServer(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		fetched := aggregate.AggregateReceiver(getTagos(r))
-		resp, err := json.Marshal(types.GetRespInit(fetched))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(resp)
-	case "POST":
-		if err := postTagos(r); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		} else {
-			w.WriteHeader(http.StatusCreated)
-		}
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
-	}
+	resp := aggregate.ToResponse(getTagos(args.Text))
+	w.Write([]byte(resp))
+	w.WriteHeader(http.StatusOK)
 }
 
-func getTagos(r *http.Request) []map[string]interface{} {
-	mode := r.URL.Query().Get("mode")
-	now := time.Now()
+func PostTagosHttpServer(w http.ResponseWriter, r *http.Request) {
+	args, err := slack.SlashCommandParse(r)
+  if err != nil {
+		log.Fatalf("Failed from PostTagosHttpServer: %v", err)
+    w.WriteHeader(http.StatusBadRequest)
+		return
+  }
+
+	slice := strings.Split(args.Text, " ")
+	if len(slice) > 1 {
+		if err := postTagos(args.UserName, slice[0]); err != nil {
+			log.Fatalf("Failed from PostTagosHttpServer: %v", err)
+			w.Write([]byte("おや！何か手違いがありました！ もう一度試してください😭"))
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			response := fmt.Sprintf("%vさんから%vさんに🌮が届きました！\n「%v」", args.UserName, slice[0], slice[1])
+			w.Write([]byte(response))
+			w.WriteHeader(http.StatusCreated)
+		}
+		return
+	}
+	w.Write([]byte("おや！何か手違いがありました！ もう一度試してください😭"))
+	w.WriteHeader(http.StatusBadRequest)
+}
+
+func getTagos(mode string) []map[string]interface{} {
+	now := time.Now().Add(time.Hour * 9)
 	empty := make([]map[string]interface{}, 0)
 	data := types.TagosRecordInit("", "", now.Year(), int(now.Month()), now.Day())
 	ctx, client, err := firestore.GetClient()
@@ -55,20 +70,14 @@ func getTagos(r *http.Request) []map[string]interface{} {
 	return resp
 }
 
-func postTagos(r *http.Request) error {
-	var body *types.Body
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-    log.Fatalf("Failed from postTagos: %v", err)
-    return err
-  }
-
+func postTagos(sender, receiver string) error {
 	ctx, client, err := firestore.GetClient()
 	if err != nil {
 		log.Fatalf("Failed from postTagos: %v", err)
     return err
 	}
-	now := time.Now()
-	data := types.TagosRecordInit(body.Sender, body.Reveiver, now.Year(), int(now.Month()), now.Day())
+	now := time.Now().Add(time.Hour * 9)
+	data := types.TagosRecordInit(sender, receiver, now.Year(), int(now.Month()), now.Day())
 	if err := firestore.PostTagos(data, ctx, client); err != nil {
 		log.Fatalf("Failed from postTagos: %v", err)
     return err

@@ -126,7 +126,7 @@ func monthTagos(data *types.TagosRecord, ctx context.Context, client *firestore.
 
 func dateTagos(data *types.TagosRecord, ctx context.Context, client *firestore.Client) ([]map[string]interface{}, error) {
 	col := collectionName()
-	iter := client.Collection(col).Where("year", "==", data.Year).Where("month", "==", data.Month).Where("date", "==", data.Month).Documents(ctx)
+	iter := client.Collection(col).Where("year", "==", data.Year).Where("month", "==", data.Month).Where("date", "==", data.Date).Documents(ctx)
 	resp, err := tagosIterator(iter)
 	return resp, err
 }

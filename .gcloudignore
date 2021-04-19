@@ -16,6 +16,9 @@
 README.md
 test.sh
 depoly.sh
+deploy-get-heyTagos.sh
+deploy-post-heyTagos.sh
+*_test.go
 
 go.sum
 

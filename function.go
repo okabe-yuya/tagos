@@ -23,7 +23,14 @@ func GetTagosHttpServer(w http.ResponseWriter, r *http.Request) {
   }
 
 	resp := aggregate.ToResponse(getTagos(args.Text))
-	w.Write([]byte(resp))
+	params := &slack.Msg{Text: resp, ResponseType: "in_channel"}
+	b, err := json.Marshal(params)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(b)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -43,7 +50,14 @@ func PostTagosHttpServer(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		} else {
 			response := fmt.Sprintf("%vさんから%vさんに🌮が届きました！\n「%v」", args.UserName, slice[0], slice[1])
-			w.Write([]byte(response))
+			params := &slack.Msg{Text: response, ResponseType: "in_channel"}
+			b, err := json.Marshal(params)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(b)
 			w.WriteHeader(http.StatusCreated)
 		}
 		return

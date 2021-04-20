@@ -16,3 +16,8 @@
 
 # GoogleCloudPlatform service accounts
 serviceAccount.json
+
+test.sh
+depoly.sh
+deploy-get-heyTagos.sh
+deploy-post-heyTagos.sh

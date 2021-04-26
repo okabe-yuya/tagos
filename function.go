@@ -1,12 +1,12 @@
 package p
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 	"strings"
-	"encoding/json"
+	"time"
 
 	"github.com/okabe-yuya/tagos/aggregate"
 	"github.com/okabe-yuya/tagos/firestore"
@@ -49,7 +49,7 @@ func PostTagosHttpServer(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("おや！何か手違いがありました！ もう一度試してください😭"))
 			w.WriteHeader(http.StatusBadRequest)
 		} else {
-			response := fmt.Sprintf("%vさんから%vさんに🌮が届きました！\n「%v」", args.UserName, slice[0], slice[1])
+			response := fmt.Sprintf("** 投稿ありがとうございます！")
 			params := &slack.Msg{Text: response, ResponseType: "in_channel"}
 			b, err := json.Marshal(params)
 			if err != nil {
